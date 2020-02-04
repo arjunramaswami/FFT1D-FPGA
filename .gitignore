@@ -9,7 +9,12 @@ tags
 slurm*
 *.swp
 *.vscode
-host
 *.log
 *.mon
 *.sof
+*.aoco
+*.aocr
+*.aocx
+
+fft1d_original
+fft2d
