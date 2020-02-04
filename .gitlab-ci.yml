@@ -1,0 +1,43 @@
+stages:
+  - build
+  - emulate
+  - report
+
+build:host:
+  stage: build
+  script:
+    - cd fft1d
+    - mkdir -p bin
+    - make
+  artifacts:
+    paths:
+        - fft1d/bin/host
+
+build:kernel:
+  stage: build
+  script:
+    - mkdir -p fft1d/bin
+    - aoc -g -v -march=emulator -legacy-emulator -no-interleaving=default -fpc fft1d/device/fft1d.cl -o fft1d/bin/fft1d.aocx
+  artifacts:
+    paths:
+      - fft1d/bin/fft1d.aocx
+
+emulate:
+  stage: emulate
+  script:
+    - cd fft1d
+    - env CL_CONTEXT_EMULATOR_DEVICE_INTELFPGA=1 bin/host -n 1
+  dependencies:
+    - build:host
+    - build:kernel
+
+report:
+  stage: report
+  script:
+    - cd fft1d
+    - mkdir -p report
+    - aoc -g -v -report -rtl  -cl-single-precision-constant -fpc -no-interleaving=default device/fft1d.cl -o report/fft1d.aocr
+    - cp -r report/fft1d/reports .
+  artifacts:
+    paths:
+      - fft1d/reports/*
